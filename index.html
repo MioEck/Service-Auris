@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Service Auris</title>
+<meta name="theme-color" content="#d71920">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+  :root {
+    --red: #d71920;
+    --red-dark: #a8121a;
+    --red-light: #fde8e9;
+    --silver: #c0c4c8;
+    --silver-dark: #8a9096;
+    --bg: #f6f6f7;
+    --card: #ffffff;
+    --text: #1f2226;
+    --muted: #6b7178;
+    --ok: #2e8b57;
+    --warn: #e08a00;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  header {
+    background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
+    color: #fff;
+    padding: 16px;
+    border-bottom: 4px solid var(--silver);
+  }
+  .head-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; gap: 14px; }
+  .emblem { width: 64px; height: 44px; flex: none; }
+  .brand { font-weight: 800; letter-spacing: 6px; font-size: 22px; line-height: 1; }
+  .model { font-size: 14px; opacity: .9; margin-top: 4px; }
+  .plate {
+    margin-left: auto;
+    background: #fff;
+    color: #111;
+    border: 2px solid #111;
+    border-radius: 6px;
+    font-family: "Arial Narrow", Arial, sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    display: flex;
+    align-items: stretch;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .plate .eu { background: #003399; color: #ffcc00; font-size: 10px; padding: 4px 5px; display: flex; flex-direction: column; justify-content: flex-end; }
+  .plate .txt { padding: 4px 10px; letter-spacing: 1px; }
+  main { max-width: 900px; margin: 0 auto; padding: 16px; }
+  nav { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  nav button {
+    flex: 1;
+    min-width: 110px;
+    padding: 10px;
+    border: 2px solid var(--red);
+    background: #fff;
+    color: var(--red);
+    border-radius: 999px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  nav button.active { background: var(--red); color: #fff; }
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    border-top: 3px solid var(--silver);
+  }
+  h2 { margin: 0 0 12px; font-size: 18px; color: var(--red-dark); }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  input, textarea, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--silver);
+    border-radius: 8px;
+    font-size: 16px;
+    background: #fff;
+    color: var(--text);
+  }
+  input:focus, textarea:focus { outline: 2px solid var(--red); border-color: var(--red); }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin: 12px 0; }
+  .check {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px; border: 1px solid var(--silver); border-radius: 8px; cursor: pointer;
+    color: var(--text); font-size: 15px; margin: 0;
+  }
+  .check input { width: 20px; height: 20px; accent-color: var(--red); flex: none; }
+  .check:has(input:checked) { background: var(--red-light); border-color: var(--red); }
+  .btn {
+    display: inline-block; padding: 12px 18px; border: none; border-radius: 8px;
+    background: var(--red); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer;
+  }
+  .btn:hover { background: var(--red-dark); }
+  .btn.secondary { background: #fff; color: var(--red); border: 2px solid var(--red); }
+  .btn.silver { background: var(--silver); color: #222; }
+  .btn.small { padding: 6px 10px; font-size: 13px; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 6px; border-bottom: 1px solid #eee; vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+  .status { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #fff; white-space: nowrap; }
+  .s-ok { background: var(--ok); }
+  .s-soon { background: var(--warn); }
+  .s-due { background: var(--red); }
+  .s-none { background: var(--silver-dark); }
+  .next-box {
+    display: flex; gap: 12px; flex-wrap: wrap;
+  }
+  .next-box > div {
+    flex: 1; min-width: 180px; background: var(--red-light); border-radius: 10px; padding: 12px;
+    border-left: 5px solid var(--red);
+  }
+  .next-box .big { font-size: 22px; font-weight: 800; color: var(--red-dark); }
+  .muted { color: var(--muted); font-size: 13px; }
+  .hist-item { border-bottom: 1px solid #eee; padding: 12px 0; }
+  .hist-item:last-child { border-bottom: none; }
+  .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .tag { background: #eef0f2; border: 1px solid var(--silver); border-radius: 999px; padding: 2px 8px; font-size: 12px; }
+  #syncbar {
+    position: fixed; bottom: 12px; right: 12px; padding: 8px 12px; border-radius: 999px;
+    font-size: 13px; background: #333; color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.2); z-index: 10;
+  }
+  #syncbar.ok { background: var(--ok); }
+  #syncbar.err { background: var(--red); }
+  #syncbar.busy { background: var(--warn); }
+  .hidden { display: none; }
+  .items-edit td input { padding: 6px; font-size: 14px; }
+  @media (max-width: 600px) {
+    .row { grid-template-columns: 1fr; }
+    .brand { font-size: 18px; letter-spacing: 4px; }
+    .plate { font-size: 14px; }
+    .hide-sm { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="head-inner">
+    <svg class="emblem" viewBox="0 0 100 68" aria-hidden="true">
+      <g fill="none" stroke="#e6e8ea" stroke-width="6">
+        <ellipse cx="50" cy="34" rx="46" ry="30"/>
+        <ellipse cx="50" cy="24" rx="26" ry="14"/>
+        <ellipse cx="50" cy="40" rx="11" ry="24"/>
+      </g>
+    </svg>
+    <div>
+      <div class="brand">TOYOTA</div>
+      <div class="model" id="hdrModel">Auris · Service</div>
+    </div>
+    <div class="plate"><span class="eu">D</span><span class="txt" id="hdrPlate">—</span></div>
+  </div>
+</header>
+
+<main>
+  <nav>
+    <button data-tab="overview" class="active">Übersicht</button>
+    <button data-tab="new">Neuer Service</button>
+    <button data-tab="history">Historie</button>
+    <button data-tab="settings">Einstellungen</button>
+  </nav>
+
+  <!-- ÜBERSICHT -->
+  <section id="tab-overview">
+    <div class="card">
+      <h2>Nächster Service</h2>
+      <div class="next-box" id="nextBox"></div>
+    </div>
+    <div class="card">
+      <h2>Aktueller Kilometerstand</h2>
+      <div class="row">
+        <div>
+          <label for="curKm">Kilometerstand heute</label>
+          <input type="number" id="curKm" inputmode="numeric" min="0" step="1">
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="btn" id="saveCurKm">Speichern</button>
+        </div>
+      </div>
+      <div class="muted" id="curKmInfo"></div>
+    </div>
+    <div class="card">
+      <h2>Wartungsplan</h2>
+      <table>
+        <thead><tr><th>Arbeit</th><th class="hide-sm">Zuletzt</th><th>Fällig bei</th><th>Status</th></tr></thead>
+        <tbody id="planBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- NEUER SERVICE -->
+  <section id="tab-new" class="hidden">
+    <div class="card">
+      <h2 id="formTitle">Service eintragen</h2>
+      <form id="serviceForm">
+        <div class="row">
+          <div>
+            <label for="fDate">Datum</label>
+            <input type="date" id="fDate" required>
+          </div>
+          <div>
+            <label for="fKm">Kilometerstand</label>
+            <input type="number" id="fKm" inputmode="numeric" min="0" step="1" required>
+          </div>
+        </div>
+        <label>Was wurde gemacht?</label>
+        <div class="checks" id="fChecks"></div>
+        <div class="row">
+          <div>
+            <label for="fShop">Werkstatt (optional)</label>
+            <input type="text" id="fShop">
+          </div>
+          <div>
+            <label for="fCost">Kosten in € (optional)</label>
+            <input type="number" id="fCost" inputmode="decimal" min="0" step="0.01">
+          </div>
+        </div>
+        <label for="fNote">Notiz / weitere Arbeiten</label>
+        <textarea id="fNote" rows="3"></textarea>
+        <div class="btn-row" style="margin-top:12px">
+          <button type="submit" class="btn">Speichern</button>
+          <button type="button" class="btn secondary hidden" id="cancelEdit">Abbrechen</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- HISTORIE -->
+  <section id="tab-history" class="hidden">
+    <div class="card">
+      <h2>Service-Historie</h2>
+      <div id="histList"></div>
+    </div>
+  </section>
+
+  <!-- EINSTELLUNGEN -->
+  <section id="tab-settings" class="hidden">
+    <div class="card">
+      <h2>Fahrzeug</h2>
+      <div class="row">
+        <div>
+          <label for="sPlate">Kennzeichen</label>
+          <input type="text" id="sPlate" placeholder="z. B. B-AB 1234">
+        </div>
+        <div>
+          <label for="sModel">Modell</label>
+          <input type="text" id="sModel" placeholder="Auris">
+        </div>
+      </div>
+      <button class="btn" id="saveVehicle">Fahrzeug speichern</button>
+    </div>
+
+    <div class="card">
+      <h2>Intervalle</h2>
+      <p class="muted">Pro Arbeit: nach wie vielen km und/oder Monaten sie wieder fällig ist (was zuerst eintritt). Leer = kein Intervall. Bitte an die Angaben aus deinem Toyota-Serviceheft anpassen.</p>
+      <table class="items-edit">
+        <thead><tr><th>Arbeit</th><th>km</th><th>Monate</th><th></th></tr></thead>
+        <tbody id="itemsBody"></tbody>
+      </table>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn secondary" id="addItem">+ Arbeit hinzufügen</button>
+        <button class="btn" id="saveItems">Intervalle speichern</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Speichern auf GitHub</h2>
+      <p class="muted">Die Daten werden als <code>data.json</code> in deinem GitHub-Repository gespeichert. Dafür braucht die App einmalig pro Gerät einen GitHub-Token (Fine-grained, nur Repository „Service-Auris“, Berechtigung „Contents: Read and write“). Der Token bleibt nur auf diesem Gerät.</p>
+      <div class="row">
+        <div>
+          <label for="gOwner">GitHub-Benutzer</label>
+          <input type="text" id="gOwner">
+        </div>
+        <div>
+          <label for="gRepo">Repository</label>
+          <input type="text" id="gRepo">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="gBranch">Branch</label>
+          <input type="text" id="gBranch">
+        </div>
+        <div>
+          <label for="gToken">Token</label>
+          <input type="password" id="gToken" autocomplete="off" placeholder="github_pat_…">
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="saveGh">Verbinden &amp; laden</button>
+        <button class="btn silver" id="syncNow">Jetzt speichern</button>
+      </div>
+      <p class="muted" id="ghInfo"></p>
+    </div>
+
+    <div class="card">
+      <h2>Sicherung</h2>
+      <div class="btn-row">
+        <button class="btn secondary" id="exportBtn">Als Datei exportieren</button>
+        <label class="btn secondary" style="margin:0">Datei importieren<input type="file" id="importFile" accept="application/json" class="hidden"></label>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="syncbar" class="hidden"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  const LS_DATA = "serviceAuris.data";
+  const LS_GH = "serviceAuris.github";
+  const DATA_PATH = "data.json";
+  const SOON_KM = 1000;
+  const SOON_DAYS = 30;
+
+  const DEFAULT_ITEMS = [
+    { id: "oil",       name: "Motoröl gewechselt",          km: 15000, months: 12 },
+    { id: "oilfilter", name: "Ölfilter",                     km: 15000, months: 12 },
+    { id: "airout",    name: "Luftfilter außen (Motor)",     km: 15000, months: 12 },
+    { id: "airin",     name: "Luftfilter innen (Innenraum)", km: 15000, months: 12 },
+    { id: "coolant",   name: "Kühlwasser gewechselt",        km: 15000, months: 12 },
+    { id: "brakefl",   name: "Bremsflüssigkeit",             km: 15000, months: 12 },
+    { id: "spark",     name: "Zündkerzen",                   km: 15000, months: 12 },
+    { id: "brakes",    name: "Bremsen geprüft/erneuert",     km: 15000, months: 12 },
+    { id: "wipers",    name: "Scheibenwischer",              km: null,  months: 12 },
+    { id: "tires",     name: "Reifenwechsel",                km: null,  months: 6  }
+  ];
+
+  function emptyData() {
+    return {
+      version: 1,
+      vehicle: { plate: "", model: "Auris", currentKm: null, currentKmDate: null },
+      items: DEFAULT_ITEMS.map(i => ({ ...i })),
+      services: [],
+      updatedAt: null
+    };
+  }
+
+  // ---------- Storage helpers ----------
+  function lsGet(key) {
+    try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; }
+  }
+  function lsSet(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) { /* ignore */ }
+  }
+
+  function guessRepo() {
+    const host = location.hostname;
+    const m = host.match(/^([^.]+)\.github\.io$/i);
+    const seg = location.pathname.split("/").filter(Boolean)[0];
+    return {
+      owner: m ? m[1] : "MioEck",
+      repo: m && seg ? seg : "Service-Auris"
+    };
+  }
+
+  let gh = Object.assign({ branch: "main", token: "" }, guessRepo(), lsGet(LS_GH) || {});
+  let data = normalize(lsGet(LS_DATA)) || emptyData();
+  let remoteSha = null;
+  let saveTimer = null;
+  let saving = false;
+  let pendingSave = false;
+  let editId = null;
+
+  function normalize(d) {
+    if (!d || typeof d !== "object") return null;
+    const base = emptyData();
+    return {
+      version: 1,
+      vehicle: Object.assign(base.vehicle, d.vehicle || {}),
+      items: Array.isArray(d.items) && d.items.length ? d.items : base.items,
+      services: Array.isArray(d.services) ? d.services : [],
+      updatedAt: d.updatedAt || null
+    };
+  }
+
+  // ---------- GitHub API ----------
+  function b64encode(str) {
+    const bytes = new TextEncoder().encode(str);
+    let bin = "";
+    bytes.forEach(b => bin += String.fromCharCode(b));
+    return btoa(bin);
+  }
+  function b64decode(b64) {
+    const bin = atob(b64.replace(/\n/g, ""));
+    const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
+  }
+  function apiUrl() {
+    return `https://api.github.com/repos/${encodeURIComponent(gh.owner)}/${encodeURIComponent(gh.repo)}/contents/${DATA_PATH}`;
+  }
+  function headers() {
+    const h = { "Accept": "application/vnd.github+json" };
+    if (gh.token) h["Authorization"] = "Bearer " + gh.token;
+    return h;
+  }
+
+  async function fetchRemote() {
+    const res = await fetch(apiUrl() + "?ref=" + encodeURIComponent(gh.branch) + "&t=" + Date.now(), { headers: headers(), cache: "no-store" });
+    if (res.status === 404) return { data: null, sha: null };
+    if (!res.ok) throw new Error("Laden fehlgeschlagen (" + res.status + ")");
+    const json = await res.json();
+    return { data: normalize(JSON.parse(b64decode(json.content))), sha: json.sha };
+  }
+
+  async function putRemote() {
+    const body = {
+      message: "Service-Daten aktualisiert " + new Date().toLocaleString("de-DE"),
+      content: b64encode(JSON.stringify(data, null, 2) + "\n"),
+      branch: gh.branch
+    };
+    if (remoteSha) body.sha = remoteSha;
+    let res = await fetch(apiUrl(), { method: "PUT", headers: headers(), body: JSON.stringify(body) });
+    if (res.status === 409 || res.status === 422) {
+      // SHA veraltet: aktuellen SHA holen und erneut speichern
+      const cur = await fetchRemote();
+      remoteSha = cur.sha;
+      if (remoteSha) body.sha = remoteSha; else delete body.sha;
+      res = await fetch(apiUrl(), { method: "PUT", headers: headers(), body: JSON.stringify(body) });
+    }
+    if (!res.ok) {
+      let msg = res.status;
+      try { msg += " " + (await res.json()).message; } catch (e) { /* ignore */ }
+      throw new Error("Speichern fehlgeschlagen (" + msg + ")");
+    }
+    const json = await res.json();
+    remoteSha = json.content.sha;
+  }
+
+  function showSync(text, cls, autohide) {
+    const el = document.getElementById("syncbar");
+    el.textContent = text;
+    el.className = cls || "";
+    if (autohide) setTimeout(() => { if (el.textContent === text) el.classList.add("hidden"); }, 3000);
+  }
+
+  function persist() {
+    data.updatedAt = new Date().toISOString();
+    lsSet(LS_DATA, data);
+    render();
+    if (!gh.token) {
+      showSync("Nur lokal gespeichert – GitHub-Token fehlt (Einstellungen)", "err");
+      return;
+    }
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(syncToGitHub, 400);
+  }
+
+  async function syncToGitHub() {
+    if (!gh.token) return;
+    if (saving) { pendingSave = true; return; }
+    saving = true;
+    showSync("Speichere auf GitHub …", "busy");
+    try {
+      await putRemote();
+      showSync("Auf GitHub gespeichert ✓", "ok", true);
+    } catch (e) {
+      showSync(e.message, "err");
+    } finally {
+      saving = false;
+      if (pendingSave) { pendingSave = false; syncToGitHub(); }
+    }
+  }
+
+  async function loadFromGitHub() {
+    showSync("Lade von GitHub …", "busy");
+    try {
+      const r = await fetchRemote();
+      remoteSha = r.sha;
+      if (r.data) {
+        const localNewer = data.updatedAt && r.data.updatedAt && data.updatedAt > r.data.updatedAt;
+        if (localNewer && gh.token) {
+          render();
+          await syncToGitHub();
+          return;
+        }
+        data = r.data;
+        lsSet(LS_DATA, data);
+        showSync("Von GitHub geladen ✓", "ok", true);
+      } else if (gh.token && (data.services.length || data.vehicle.plate)) {
+        await syncToGitHub();
+      } else {
+        showSync(gh.token ? "Noch keine Daten auf GitHub" : "Noch keine Daten", "", true);
+      }
+    } catch (e) {
+      showSync(e.message + " – lokale Daten werden angezeigt", "err");
+    }
+    render();
+  }
+
+  // ---------- Berechnung ----------
+  function fmtKm(n) { return n == null || n === "" ? "—" : Number(n).toLocaleString("de-DE") + " km"; }
+  function fmtDate(iso) {
+    if (!iso) return "—";
+    const [y, m, d] = iso.split("-");
+    return `${d}.${m}.${y}`;
+  }
+  function todayIso() {
+    const d = new Date();
+    return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  }
+  function addMonths(iso, months) {
+    const [y, m, d] = iso.split("-").map(Number);
+    const target = new Date(y, m - 1 + months, 1);
+    const lastDay = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+    target.setDate(Math.min(d, lastDay));
+    const mm = String(target.getMonth() + 1).padStart(2, "0");
+    const dd = String(target.getDate()).padStart(2, "0");
+    return `${target.getFullYear()}-${mm}-${dd}`;
+  }
+  function daysBetween(a, b) {
+    return Math.round((new Date(b + "T00:00:00") - new Date(a + "T00:00:00")) / 86400000);
+  }
+
+  function currentKm() {
+    let km = data.vehicle.currentKm != null ? Number(data.vehicle.currentKm) : null;
+    data.services.forEach(s => { if (km == null || Number(s.km) > km) km = Number(s.km); });
+    return km;
+  }
+
+  function sortedServices() {
+    return [...data.services].sort((a, b) => (b.date.localeCompare(a.date)) || (b.km - a.km));
+  }
+
+  function planFor(item) {
+    const last = sortedServices().find(s => s.items.includes(item.id));
+    if (!last) return { item, last: null, status: "none" };
+    const nextKm = item.km ? Number(last.km) + Number(item.km) : null;
+    const nextDate = item.months ? addMonths(last.date, Number(item.months)) : null;
+    const cur = currentKm();
+    const today = todayIso();
+    const kmLeft = nextKm != null && cur != null ? nextKm - cur : null;
+    const daysLeft = nextDate ? daysBetween(today, nextDate) : null;
+    let status = "ok";
+    if ((kmLeft != null && kmLeft <= 0) || (daysLeft != null && daysLeft <= 0)) status = "due";
+    else if ((kmLeft != null && kmLeft <= SOON_KM) || (daysLeft != null && daysLeft <= SOON_DAYS)) status = "soon";
+    return { item, last, nextKm, nextDate, kmLeft, daysLeft, status };
+  }
+
+  const STATUS_TXT = { ok: "OK", soon: "Bald fällig", due: "Fällig", none: "Kein Eintrag" };
+
+  // ---------- Rendering ----------
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  function render() {
+    document.getElementById("hdrPlate").textContent = data.vehicle.plate || "—";
+    document.getElementById("hdrModel").textContent = (data.vehicle.model || "Auris") + " · Service";
+    renderOverview();
+    renderChecks();
+    renderHistory();
+    renderSettings();
+  }
+
+  function renderOverview() {
+    const plans = data.items.map(planFor);
+    const active = plans.filter(p => p.status !== "none");
+    const box = document.getElementById("nextBox");
+    const cur = currentKm();
+
+    if (!active.length) {
+      box.innerHTML = `<div><div class="big">Noch kein Service</div><div class="muted">Trage unter „Neuer Service“ den ersten Service ein.</div></div>`;
+    } else {
+      const kms = active.filter(p => p.nextKm != null).map(p => p.nextKm);
+      const dates = active.filter(p => p.nextDate).map(p => p.nextDate).sort();
+      const nextKm = kms.length ? Math.min(...kms) : null;
+      const nextDate = dates.length ? dates[0] : null;
+      const kmItems = active.filter(p => p.nextKm === nextKm).map(p => p.item.name);
+      const dateItems = active.filter(p => p.nextDate === nextDate).map(p => p.item.name);
+      let html = "";
+      if (nextKm != null) {
+        const left = cur != null ? nextKm - cur : null;
+        html += `<div><div class="muted">Nächster Service bei</div><div class="big">${fmtKm(nextKm)}</div>
+          <div class="muted">${left != null ? (left > 0 ? "noch " + fmtKm(left) : "überfällig um " + fmtKm(-left)) : ""}</div>
+          <div class="muted">${esc(kmItems.join(", "))}</div></div>`;
+      }
+      if (nextDate) {
+        const d = daysBetween(todayIso(), nextDate);
+        html += `<div><div class="muted">Spätestens am</div><div class="big">${fmtDate(nextDate)}</div>
+          <div class="muted">${d > 0 ? "noch " + d + " Tage" : "überfällig seit " + (-d) + " Tagen"}</div>
+          <div class="muted">${esc(dateItems.join(", "))}</div></div>`;
+      }
+      box.innerHTML = html;
+    }
+
+    document.getElementById("curKm").placeholder = cur != null ? String(cur) : "";
+    document.getElementById("curKmInfo").textContent = cur != null
+      ? "Zuletzt bekannt: " + fmtKm(cur) + (data.vehicle.currentKmDate ? " (" + fmtDate(data.vehicle.currentKmDate) + ")" : "")
+      : "";
+
+    document.getElementById("planBody").innerHTML = plans.map(p => {
+      if (p.status === "none") {
+        return `<tr><td>${esc(p.item.name)}</td><td class="hide-sm">—</td><td>—</td><td><span class="status s-none">${STATUS_TXT.none}</span></td></tr>`;
+      }
+      const due = [p.nextKm != null ? fmtKm(p.nextKm) : null, p.nextDate ? fmtDate(p.nextDate) : null].filter(Boolean).join("<br>");
+      return `<tr><td>${esc(p.item.name)}</td>
+        <td class="hide-sm">${fmtDate(p.last.date)}<br><span class="muted">${fmtKm(p.last.km)}</span></td>
+        <td>${due || "—"}</td>
+        <td><span class="status s-${p.status}">${STATUS_TXT[p.status]}</span></td></tr>`;
+    }).join("");
+  }
+
+  function renderChecks(selected) {
+    const box = document.getElementById("fChecks");
+    const sel = selected || Array.from(box.querySelectorAll("input:checked")).map(i => i.value);
+    box.innerHTML = data.items.map(i =>
+      `<label class="check"><input type="checkbox" value="${esc(i.id)}" ${sel.includes(i.id) ? "checked" : ""}> ${esc(i.name)}</label>`
+    ).join("");
+  }
+
+  function itemName(id) {
+    const it = data.items.find(i => i.id === id);
+    return it ? it.name : id;
+  }
+
+  function renderHistory() {
+    const list = sortedServices();
+    const el = document.getElementById("histList");
+    if (!list.length) { el.innerHTML = `<p class="muted">Noch keine Einträge.</p>`; return; }
+    el.innerHTML = list.map(s => `
+      <div class="hist-item">
+        <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+          <div><strong>${fmtDate(s.date)}</strong> · ${fmtKm(s.km)}
+            ${s.shop ? `<span class="muted"> · ${esc(s.shop)}</span>` : ""}
+            ${s.cost ? `<span class="muted"> · ${Number(s.cost).toLocaleString("de-DE", { style: "currency", currency: "EUR" })}</span>` : ""}
+          </div>
+          <div class="btn-row">
+            <button class="btn small secondary" data-edit="${esc(s.id)}">Bearbeiten</button>
+            <button class="btn small silver" data-del="${esc(s.id)}">Löschen</button>
+          </div>
+        </div>
+        <div class="tags">${s.items.map(id => `<span class="tag">${esc(itemName(id))}</span>`).join("")}</div>
+        ${s.note ? `<div class="muted" style="margin-top:6px;white-space:pre-wrap">${esc(s.note)}</div>` : ""}
+      </div>`).join("");
+  }
+
+  function renderSettings() {
+    document.getElementById("sPlate").value = data.vehicle.plate || "";
+    document.getElementById("sModel").value = data.vehicle.model || "";
+    document.getElementById("itemsBody").innerHTML = data.items.map((i, idx) => `
+      <tr data-idx="${idx}">
+        <td><input type="text" class="iName" value="${esc(i.name)}"></td>
+        <td><input type="number" class="iKm" min="0" step="500" value="${i.km == null ? "" : i.km}"></td>
+        <td><input type="number" class="iMonths" min="0" step="1" value="${i.months == null ? "" : i.months}"></td>
+        <td><button class="btn small silver" data-rmitem="${idx}" title="Entfernen">✕</button></td>
+      </tr>`).join("");
+    document.getElementById("gOwner").value = gh.owner;
+    document.getElementById("gRepo").value = gh.repo;
+    document.getElementById("gBranch").value = gh.branch;
+    document.getElementById("gToken").value = gh.token ? "••••••••" : "";
+    document.getElementById("ghInfo").textContent = gh.token
+      ? `Verbunden mit ${gh.owner}/${gh.repo} (${gh.branch}). Jede Änderung wird automatisch gespeichert.`
+      : "Kein Token hinterlegt – Daten werden nur geladen, nicht gespeichert.";
+  }
+
+  // ---------- Events ----------
+  document.querySelectorAll("nav button").forEach(btn => btn.addEventListener("click", () => showTab(btn.dataset.tab)));
+
+  function showTab(name) {
+    document.querySelectorAll("nav button").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+    document.querySelectorAll("main > section").forEach(s => s.classList.toggle("hidden", s.id !== "tab-" + name));
+    if (name === "new" && !editId) resetForm();
+    window.scrollTo(0, 0);
+  }
+
+  function resetForm() {
+    editId = null;
+    document.getElementById("formTitle").textContent = "Service eintragen";
+    document.getElementById("cancelEdit").classList.add("hidden");
+    document.getElementById("fDate").value = todayIso();
+    document.getElementById("fKm").value = "";
+    const cur = currentKm();
+    document.getElementById("fKm").placeholder = cur != null ? String(cur) : "";
+    document.getElementById("fShop").value = "";
+    document.getElementById("fCost").value = "";
+    document.getElementById("fNote").value = "";
+    renderChecks([]);
+  }
+
+  document.getElementById("serviceForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const items = Array.from(document.querySelectorAll("#fChecks input:checked")).map(i => i.value);
+    const note = document.getElementById("fNote").value.trim();
+    if (!items.length && !note) { alert("Bitte mindestens eine Arbeit ankreuzen oder eine Notiz eintragen."); return; }
+    const entry = {
+      id: editId || (Date.now().toString(36) + Math.random().toString(36).slice(2, 6)),
+      date: document.getElementById("fDate").value,
+      km: Number(document.getElementById("fKm").value),
+      items,
+      shop: document.getElementById("fShop").value.trim(),
+      cost: document.getElementById("fCost").value ? Number(document.getElementById("fCost").value) : null,
+      note
+    };
+    if (editId) data.services = data.services.map(s => s.id === editId ? entry : s);
+    else data.services.push(entry);
+    editId = null;
+    persist();
+    showTab("overview");
+  });
+
+  document.getElementById("cancelEdit").addEventListener("click", () => { editId = null; showTab("history"); });
+
+  document.getElementById("histList").addEventListener("click", e => {
+    const del = e.target.closest("[data-del]");
+    const edit = e.target.closest("[data-edit]");
+    if (del) {
+      if (!confirm("Diesen Eintrag wirklich löschen?")) return;
+      data.services = data.services.filter(s => s.id !== del.dataset.del);
+      persist();
+    } else if (edit) {
+      const s = data.services.find(x => x.id === edit.dataset.edit);
+      if (!s) return;
+      editId = s.id;
+      showTab("new");
+      document.getElementById("formTitle").textContent = "Service bearbeiten";
+      document.getElementById("cancelEdit").classList.remove("hidden");
+      document.getElementById("fDate").value = s.date;
+      document.getElementById("fKm").value = s.km;
+      document.getElementById("fShop").value = s.shop || "";
+      document.getElementById("fCost").value = s.cost == null ? "" : s.cost;
+      document.getElementById("fNote").value = s.note || "";
+      renderChecks(s.items);
+    }
+  });
+
+  document.getElementById("saveCurKm").addEventListener("click", () => {
+    const v = document.getElementById("curKm").value;
+    if (v === "") return;
+    data.vehicle.currentKm = Number(v);
+    data.vehicle.currentKmDate = todayIso();
+    document.getElementById("curKm").value = "";
+    persist();
+  });
+
+  document.getElementById("saveVehicle").addEventListener("click", () => {
+    data.vehicle.plate = document.getElementById("sPlate").value.trim().toUpperCase();
+    data.vehicle.model = document.getElementById("sModel").value.trim() || "Auris";
+    persist();
+  });
+
+  function readItemsTable() {
+    return Array.from(document.querySelectorAll("#itemsBody tr")).map(tr => {
+      const old = data.items[Number(tr.dataset.idx)] || {};
+      const name = tr.querySelector(".iName").value.trim();
+      const km = tr.querySelector(".iKm").value;
+      const months = tr.querySelector(".iMonths").value;
+      return {
+        id: old.id || ("c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5)),
+        name: name || "Unbenannt",
+        km: km === "" ? null : Number(km),
+        months: months === "" ? null : Number(months)
+      };
+    });
+  }
+
+  document.getElementById("addItem").addEventListener("click", () => {
+    data.items = readItemsTable();
+    data.items.push({ id: "c" + Date.now().toString(36), name: "", km: 15000, months: 12 });
+    renderSettings();
+    const inputs = document.querySelectorAll("#itemsBody .iName");
+    inputs[inputs.length - 1].focus();
+  });
+
+  document.getElementById("itemsBody").addEventListener("click", e => {
+    const b = e.target.closest("[data-rmitem]");
+    if (!b) return;
+    const items = readItemsTable();
+    const it = items[Number(b.dataset.rmitem)];
+    if (data.services.some(s => s.items.includes(it.id)) &&
+        !confirm(`„${it.name}“ kommt in der Historie vor. Trotzdem entfernen?`)) return;
+    items.splice(Number(b.dataset.rmitem), 1);
+    data.items = items;
+    renderSettings();
+  });
+
+  document.getElementById("saveItems").addEventListener("click", () => {
+    data.items = readItemsTable();
+    persist();
+  });
+
+  document.getElementById("saveGh").addEventListener("click", () => {
+    gh.owner = document.getElementById("gOwner").value.trim();
+    gh.repo = document.getElementById("gRepo").value.trim();
+    gh.branch = document.getElementById("gBranch").value.trim() || "main";
+    const t = document.getElementById("gToken").value.trim();
+    if (t && t !== "••••••••") gh.token = t;
+    if (!t) gh.token = "";
+    lsSet(LS_GH, gh);
+    remoteSha = null;
+    loadFromGitHub();
+  });
+
+  document.getElementById("syncNow").addEventListener("click", () => {
+    if (!gh.token) { showSync("Bitte zuerst Token eintragen", "err", true); return; }
+    syncToGitHub();
+  });
+
+  document.getElementById("exportBtn").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "service-auris-" + todayIso() + ".json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  document.getElementById("importFile").addEventListener("change", async e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    try {
+      const d = normalize(JSON.parse(await f.text()));
+      if (!d) throw new Error();
+      if (!confirm("Aktuelle Daten durch die Datei ersetzen?")) return;
+      data = d;
+      persist();
+    } catch (err) {
+      alert("Datei konnte nicht gelesen werden.");
+    }
+    e.target.value = "";
+  });
+
+  // ---------- Start ----------
+  resetForm();
+  render();
+  loadFromGitHub();
+})();
+</script>
+</body>
+</html>
