@@ -68,6 +68,21 @@
       "months": 6
     }
   ],
-  "services": [],
-  "updatedAt": "2026-09-22T20:05:08.429Z"
+  "services": [
+    {
+      "id": "mud3v8iidyhx",
+      "date": "2026-09-22",
+      "km": 139172,
+      "items": [
+        "oil",
+        "oilfilter",
+        "airout",
+        "airin"
+      ],
+      "shop": "",
+      "cost": null,
+      "note": "Öl 0w20 Original Toyota\nFilter innen von Denso\nÖl und Luftfilter von MAN"
+    }
+  ],
+  "updatedAt": "2026-09-22T20:07:16.698Z"
 }
