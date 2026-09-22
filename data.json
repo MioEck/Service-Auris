@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "vehicle": {
+    "plate": "ECK NM 147",
+    "model": "Auris",
+    "currentKm": null,
+    "currentKmDate": null
+  },
+  "items": [
+    {
+      "id": "oil",
+      "name": "Motoröl gewechselt",
+      "km": 15000,
+      "months": 12
+    },
+    {
+      "id": "oilfilter",
+      "name": "Ölfilter",
+      "km": 15000,
+      "months": 12
+    },
+    {
+      "id": "airout",
+      "name": "Luftfilter außen (Motor)",
+      "km": 15000,
+      "months": 12
+    },
+    {
+      "id": "airin",
+      "name": "Luftfilter innen (Innenraum)",
+      "km": 15000,
+      "months": 12
+    },
+    {
+      "id": "coolant",
+      "name": "Kühlwasser gewechselt",
+      "km": 15000,
+      "months": 12
+    },
+    {
+      "id": "brakefl",
+      "name": "Bremsflüssigkeit",
+      "km": 15000,
+      "months": 12
+    },
+    {
+      "id": "spark",
+      "name": "Zündkerzen",
+      "km": 15000,
+      "months": 12
+    },
+    {
+      "id": "brakes",
+      "name": "Bremsen geprüft/erneuert",
+      "km": 15000,
+      "months": 12
+    },
+    {
+      "id": "wipers",
+      "name": "Scheibenwischer",
+      "km": null,
+      "months": 12
+    },
+    {
+      "id": "tires",
+      "name": "Reifenwechsel",
+      "km": null,
+      "months": 6
+    }
+  ],
+  "services": [],
+  "updatedAt": "2026-09-22T20:05:08.429Z"
+}
